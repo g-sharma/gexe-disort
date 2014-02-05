@@ -58,8 +58,6 @@ def _anonmyize(filename,remove_private_tags=True):
 		ds = dicom.read_file(filename,force=True)
 	 except:
 		print "Not a dicom file...."
-t remote set-url origin git@github.com:user/repo.git
-
 	 
 	 if dic.has_key(ds.PatientID):
 	 	de_name=dic[ds.PatientID]
