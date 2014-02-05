@@ -22,9 +22,7 @@ def _create_dic_from_translation_table():
 	 #First element of each row is Deidenfied variable for particular
 	 #PatientID..Chronologically...given...
 	 global dic
-	 transt_file = open('/home/gsharma/Programming/Python/gexe_sort/stoptranstable.txt','r')
-	 #Create an empty dictionary....
-	 dic={}
+	 transt_file = open('/home/gsharma/Programming/Python/gexe_disort/stoptranstable.txt','r')
 	 # Looping through each line.....
 	 for line in transt_file:
 		# What the below line is doing
@@ -48,8 +46,8 @@ def _anonmyize(filename,remove_private_tags=True):
 
 	 # This is pydicom beauty... Once call back and recursively I can 
 	 # access all the tags which have PN as VR....
-	 global dic
-	 foldername='/home/gsharma/Programming/Python/gexe_sort/DICOM/'
+	 global dic,dupfiles
+	 foldername='/home/gsharma/Programming/Python/gexe_disort/DICOM/'
 	 def PN_callback(ds, data_element):
 	 	if data_element.VR == "PN":
 	 		data_element.value = de_name
@@ -90,7 +88,6 @@ def _anonmyize(filename,remove_private_tags=True):
 
 	 foldername=foldername+'/'+de_name+'/'+str(ds.StudyDate)+'T'+str(ds.StudyTime)+'/'+str(ds.SeriesNumber)+'_'+str(ds.SeriesDescription).replace(" ","_")
 	 fname=de_name+'_'+str(ds.Modality)+'_'+str(ds.StudyDate)+'T'+str(ds.StudyTime)+'_'+str(ds.SeriesNumber)+'_'+str(ds.SeriesInstanceUID)+'_'+str(ds.InstanceNumber)
-	 print fname
 	 if not os.path.exists(foldername):
 	 	os.makedirs(foldername)
          
@@ -98,10 +95,13 @@ def _anonmyize(filename,remove_private_tags=True):
 		ds.save_as(foldername+'/'+fname)
 	 else:
 		print "Duplicate......"
-
+		dupfiles.append(filename)
 
 if __name__ == '__main__':
-	
+	global dupfiles,dic
+	dupfiles=[]
+	dic={}
+
 	try:
 		#Pydicom library developed by MIT..Very Intitutive...
 		import dicom
@@ -125,3 +125,5 @@ if __name__ == '__main__':
 		for root,dir,files in os.walk(sys.argv[1]):
 			for each in files:
 				_anonmyize(os.path.join(root,each))
+
+        print "Total Number of Duplicate files = "+str(len(dupfiles)) 
