@@ -8,21 +8,14 @@
 # 
 #***********************************************************************
 
-usage = """
-Usage:
-python gexe_sort.py inputdicom_dir ouput_dir
-OR.....
-python gexe_sort.py inputdicomfile.dcm outputdicomfile.dicom
-"""
-
 # Rigrous testing required.....
 
-def _create_dic_from_translation_table():
+def _create_dic_from_translation_table(table):
 	 #Read the text file of translation table
 	 #First element of each row is Deidenfied variable for particular
 	 #PatientID..Chronologically...given...
 	 global dic
-	 transt_file = open('/home/gsharma/Programming/Python/gexe_disort/stoptranstable.txt','r')
+	 transt_file = open(table,'r')
 	 # Looping through each line.....
 	 for line in transt_file:
 		# What the below line is doing
@@ -38,16 +31,16 @@ def _create_dic_from_translation_table():
 	 		dic[tup[i+1]]=tup[0]	
 
 # Rigrous testing Required.....	 
-def _anonmyize(filename,remove_private_tags=True):
+def _anonmyize(filename,foldername,remove_private_tags=True):
 	# filename: Source which needs to be anonymized.
 	# newloc: Where should this file should be stored.
 	# newname: New name for this file.
 	# remove private tags is the flag to remove these private tags.
 
 	 # This is pydicom beauty... Once call back and recursively I can 
-	 # access all the tags which have PN as VR....
+	 # _andrew_trans_table.txt all the tags which have PN as VR....
 	 global dic,dupfiles
-	 foldername='/home/gsharma/Programming/Python/gexe_disort/DICOM/'
+	 
 	 def PN_callback(ds, data_element):
 	 	if data_element.VR == "PN":
 	 		data_element.value = de_name
@@ -78,13 +71,13 @@ def _anonmyize(filename,remove_private_tags=True):
 	 if remove_private_tags:
 	 	ds.remove_private_tags()
    
-         try:
+	 try:
 		if not "SeriesDescription" in ds:
 			ds.SeriesDescription='NA'
 	 except:
 		pass
         
-         print "Checking....."+filename 
+	 print "Checking....."+filename 
 
 	 foldername=foldername+'/'+de_name+'/'+str(ds.StudyDate)+'T'+str(ds.StudyTime)+'/'+str(ds.SeriesNumber)+'_'+str(ds.SeriesDescription).replace(" ","_")
 	 fname=de_name+'_'+str(ds.Modality)+'_'+str(ds.StudyDate)+'T'+str(ds.StudyTime)+'_'+str(ds.SeriesNumber)+'_'+str(ds.SeriesInstanceUID)+'_'+str(ds.InstanceNumber)
@@ -97,33 +90,38 @@ def _anonmyize(filename,remove_private_tags=True):
 		print "Duplicate......"
 		dupfiles.append(filename)
 
+
 if __name__ == '__main__':
+	
 	global dupfiles,dic
 	dupfiles=[]
 	dic={}
-
 	try:
 		#Pydicom library developed by MIT..Very Intitutive...
 		import dicom
 		import os
 		import sys
+		from optparse import OptionParser
 	except Exception:
 		print "Cannot import required libraries.Please Check...."
 		exit()
 	
-	_create_dic_from_translation_table()
+    parser = OptionParser()
+	parser.add_option("-t", "--table", dest="tablename",help="translation table")
+	parser.add_option("-s", "--source", dest="source",help="source data")
+	parser.add_option("-d", "--target", dest="target",help="target destination")
 
-	
-	# Lets read the directory or a file....
-	if len(sys.argv) != 2:
-		print (usage)
-		sys.exit()
-    
+	(options,args) = parser.parse_args()
+
+	_create_dic_from_translation_table(options.tablename)
+
+	   
     #
-	if os.path.isdir(sys.argv[1]):
-		dname=os.path.basename(sys.argv[1])
-		for root,dir,files in os.walk(sys.argv[1]):
+	if os.path.isdir(options.source):
+		dname=os.path.basename(options.source)
+		for root,dir,files in os.walk(options.source):
 			for each in files:
-				_anonmyize(os.path.join(root,each))
+				print options.target
+				_anonmyize(os.path.join(root,each),options.target)
 
         print "Total Number of Duplicate files = "+str(len(dupfiles)) 
