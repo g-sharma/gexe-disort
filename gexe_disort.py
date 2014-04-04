@@ -8,7 +8,7 @@
 # 
 #***********************************************************************
 
-# Rigrous testing required.....
+# rigorous testing required.....
 
 def _create_dic_from_translation_table(table):
 	 #Read the text file of translation table
@@ -83,7 +83,7 @@ def _anonmyize(filename,foldername,remove_private_tags=True):
 	 fname=de_name+'_'+str(ds.Modality)+'_'+str(ds.StudyDate)+'T'+str(ds.StudyTime)+'_'+str(ds.SeriesNumber)+'_'+str(ds.SeriesInstanceUID)+'_'+str(ds.InstanceNumber)
 	 if not os.path.exists(foldername):
 	 	os.makedirs(foldername)
-         
+          
 	 if not os.path.isfile(foldername+'/'+fname):
 		ds.save_as(foldername+'/'+fname)
 	 else:
