@@ -8,7 +8,7 @@
 # 
 #***********************************************************************
 
-# rigorous testing required.....
+# Rigorous testing required.....
 
 def _create_dic_from_translation_table(table):
 	 #Read the text file of translation table
@@ -106,7 +106,7 @@ if __name__ == '__main__':
 		print "Cannot import required libraries.Please Check...."
 		exit()
 	
-    parser = OptionParser()
+	parser = OptionParser()
 	parser.add_option("-t", "--table", dest="tablename",help="translation table")
 	parser.add_option("-s", "--source", dest="source",help="source data")
 	parser.add_option("-d", "--target", dest="target",help="target destination")
