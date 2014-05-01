@@ -58,18 +58,7 @@ def _anonsort(filename,foldername,remove_private_tags=True):
 
 	 # This is pydicom beauty... Once call back and recursively I can 
 	 # _andrew_trans_table.txt all the tags which have PN as VR....
-	 global dic,dupfiles
-	 
-	 rep_dic={
-         ' ':'_',
-         '^':'_',
-         '/':'_',
-         '__':'_',
-         '  ':'_',
-         ']':'',
-         '[':'',
-         '(':'',
-         ')':''}
+	 global dic,dupfiles,rep_dic
 	 
 	 def PN_callback(ds, data_element):
 	 	if data_element.VR == "PN":
@@ -113,8 +102,8 @@ def _anonsort(filename,foldername,remove_private_tags=True):
          seriesName=_mreplace(ds.SeriesDescription,rep_dic)
 	 studytime,sep,tail=(ds.StudyTime).partition('.')
 	 
-	 foldername=foldername+'/'+de_name+'/'+str(ds.StudyDate)+'T'+studytime+'/'+str(ds.SeriesNumber)+'_'+seriesName  #str(ds.SeriesDescription).replace(" ","_")
-	 fname=de_name+'_'+str(ds.Modality)+'_'+str(ds.StudyDate)+'T'+studytime+'_'+str(ds.SeriesNumber)+'_'+str(ds.SeriesInstanceUID)+'_'+str(ds.InstanceNumber)
+	 foldername=foldername+'/'+de_name+'/'+str(ds.StudyDate)+studytime+'/'+str(ds.SeriesNumber)+'_'+seriesName 
+	 fname=de_name+'_'+str(ds.Modality)+'_'+str(ds.StudyDate)+studytime+'_'+str(ds.SeriesNumber)+'_'+str(ds.SeriesInstanceUID)+'_'+str(ds.InstanceNumber)
 	 if not os.path.exists(foldername):
 	 	os.makedirs(foldername)
           
@@ -125,18 +114,7 @@ def _anonsort(filename,foldername,remove_private_tags=True):
 		dupfiles.append(filename)
 
 def _sort(filename,foldername):
-	 global dic,dupfiles
-
-         rep_dic={
-         ' ':'_',
-         '^':'_',
-         '/':'_',
-         '__':'_',
-         '  ':'_',
-	 ']':'',
-	 '[':'',
-	 '(':'',
-	 ')':''}
+	 global dic,dupfiles,rep_dic
 	 
 	 try:
                 ds = dicom.read_file(filename)
@@ -155,8 +133,8 @@ def _sort(filename,foldername):
 	 pname=_mreplace(ds.PatientName,rep_dic)
 	 studytime,sep,tail=(ds.StudyTime).partition('.')
          
-	 foldername=foldername+'/'+pname+'/'+str(ds.StudyDate)+'T'+studytime+'/'+str(ds.SeriesNumber)+'_'+seriesName  #str(ds.SeriesDescription).replace(" ","_")
-         fname=str(ds.Modality)+'_'+str(ds.StudyDate)+'T'+studytime+'_'+str(ds.SeriesNumber)+'_'+str(ds.SeriesInstanceUID)+'_'+str(ds.InstanceNumber)
+	 foldername=foldername+'/'+pname+'/'+str(ds.StudyDate)+studytime+'/'+str(ds.SeriesNumber)+'_'+seriesName 
+         fname=str(ds.Modality)+'_'+'_'+str(ds.StudyDate)+studytime+'_'+str(ds.SeriesNumber)+'_'+str(ds.SeriesInstanceUID)+'_'+str(ds.InstanceNumber)
          
 	 if not os.path.exists(foldername):
                 os.makedirs(foldername)
@@ -171,7 +149,17 @@ def _sort(filename,foldername):
 
 if __name__ == '__main__':
 	
-	global dupfiles,dic
+	global dupfiles,dic,rep_dic
+	rep_dic={
+         ' ':'_',
+         '^':'_',
+         '/':'_',
+         '__':'_',
+         '  ':'_',
+         ']':'',
+         '[':'',
+         '(':'',
+         ')':''}
 	dupfiles=[]
 	dic={}
 	try:
