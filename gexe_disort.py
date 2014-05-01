@@ -3,8 +3,15 @@
 # Written By Gagan Sharma :
 # 16th Jan, 2014, Department of Radiology, The University of Melbourne
 # Australia
-#
+# 
+# To Do:
+# 1.Create a comprehensive report if there is some issues in the trasition table.
+# 2.Create a readable log
+#   Which this patient is
+#   When was sorted and which series 
+#   
 # Write a complete sorter and deidentfier in Python.....
+#
 # 
 #***********************************************************************
 
@@ -30,6 +37,18 @@ def _create_dic_from_translation_table(table):
 	 	for i in xrange(len(tup)-1):
 	 		dic[tup[i+1]]=tup[0]	
 
+def _mreplace(text, wordDic):
+        """
+                take a text and replace words that match a key in a dictionary with
+                the associated value, return the changed text
+        """
+        rc = re.compile('|'.join(map(re.escape, wordDic)))
+        def translate(match):
+                return wordDic[match.group(0)]
+        return rc.sub(translate, text)
+
+
+
 # Rigrous testing Required.....	 
 def _anonmyize(filename,foldername,remove_private_tags=True):
 	# filename: Source which needs to be anonymized.
@@ -41,20 +60,28 @@ def _anonmyize(filename,foldername,remove_private_tags=True):
 	 # _andrew_trans_table.txt all the tags which have PN as VR....
 	 global dic,dupfiles
 	 
+	 rep_dic={
+	 ' ':'_',
+         '^':'_',
+         '/':'_',
+	 '__':'_',
+	 '  ':'_'}
+	 
 	 def PN_callback(ds, data_element):
 	 	if data_element.VR == "PN":
 	 		data_element.value = de_name
 
 	 try:
-		ds = dicom.read_file(filename,force=True)
+		ds = dicom.read_file(filename)
 	 except:
 		print "Not a dicom file...."
+		return
 	 
 	 if dic.has_key(ds.PatientID):
 	 	de_name=dic[ds.PatientID]
 	 else:
 	 	print "Dictionary does not has the key......"
-	 	sys.exit()
+		return
 
 	 ds.walk(PN_callback)
 
@@ -78,8 +105,9 @@ def _anonmyize(filename,foldername,remove_private_tags=True):
 		pass
         
 	 print "Checking....."+filename 
-
-	 foldername=foldername+'/'+de_name+'/'+str(ds.StudyDate)+'T'+str(ds.StudyTime)+'/'+str(ds.SeriesNumber)+'_'+str(ds.SeriesDescription).replace(" ","_")
+	 
+         seriesName=_mreplace(ds.SeriesDescription,rep_dic)
+	 foldername=foldername+'/'+de_name+'/'+str(ds.StudyDate)+'T'+str(ds.StudyTime)+'/'+str(ds.SeriesNumber)+'_'+seriesName  #str(ds.SeriesDescription).replace(" ","_")
 	 fname=de_name+'_'+str(ds.Modality)+'_'+str(ds.StudyDate)+'T'+str(ds.StudyTime)+'_'+str(ds.SeriesNumber)+'_'+str(ds.SeriesInstanceUID)+'_'+str(ds.InstanceNumber)
 	 if not os.path.exists(foldername):
 	 	os.makedirs(foldername)
@@ -89,6 +117,7 @@ def _anonmyize(filename,foldername,remove_private_tags=True):
 	 else:
 		print "Duplicate......"
 		dupfiles.append(filename)
+
 
 
 if __name__ == '__main__':
@@ -101,6 +130,7 @@ if __name__ == '__main__':
 		import dicom
 		import os
 		import sys
+		import re
 		from optparse import OptionParser
 	except Exception:
 		print "Cannot import required libraries.Please Check...."
