@@ -61,11 +61,15 @@ def _anonsort(filename,foldername,remove_private_tags=True):
 	 global dic,dupfiles
 	 
 	 rep_dic={
-	 ' ':'_',
+         ' ':'_',
          '^':'_',
          '/':'_',
-	 '__':'_',
-	 '  ':'_'}
+         '__':'_',
+         '  ':'_',
+         ']':'',
+         '[':'',
+         '(':'',
+         ')':''}
 	 
 	 def PN_callback(ds, data_element):
 	 	if data_element.VR == "PN":
@@ -107,8 +111,10 @@ def _anonsort(filename,foldername,remove_private_tags=True):
 	 print "Checking....."+filename 
 	 
          seriesName=_mreplace(ds.SeriesDescription,rep_dic)
-	 foldername=foldername+'/'+de_name+'/'+str(ds.StudyDate)+'T'+str(ds.StudyTime)+'/'+str(ds.SeriesNumber)+'_'+seriesName  #str(ds.SeriesDescription).replace(" ","_")
-	 fname=de_name+'_'+str(ds.Modality)+'_'+str(ds.StudyDate)+'T'+str(ds.StudyTime)+'_'+str(ds.SeriesNumber)+'_'+str(ds.SeriesInstanceUID)+'_'+str(ds.InstanceNumber)
+	 studytime,sep,tail=(ds.StudyTime).partition('.')
+	 
+	 foldername=foldername+'/'+de_name+'/'+str(ds.StudyDate)+'T'+studytime+'/'+str(ds.SeriesNumber)+'_'+seriesName  #str(ds.SeriesDescription).replace(" ","_")
+	 fname=de_name+'_'+str(ds.Modality)+'_'+str(ds.StudyDate)+'T'+studytime+'_'+str(ds.SeriesNumber)+'_'+str(ds.SeriesInstanceUID)+'_'+str(ds.InstanceNumber)
 	 if not os.path.exists(foldername):
 	 	os.makedirs(foldername)
           
@@ -126,7 +132,11 @@ def _sort(filename,foldername):
          '^':'_',
          '/':'_',
          '__':'_',
-         '  ':'_'}
+         '  ':'_',
+	 ']':'',
+	 '[':'',
+	 '(':'',
+	 ')':''}
 	 
 	 try:
                 ds = dicom.read_file(filename)
@@ -143,9 +153,10 @@ def _sort(filename,foldername):
 
          seriesName=_mreplace(ds.SeriesDescription,rep_dic)
 	 pname=_mreplace(ds.PatientName,rep_dic)
+	 studytime,sep,tail=(ds.StudyTime).partition('.')
          
-	 foldername=foldername+'/'+pname+'/'+str(ds.StudyDate)+'T'+str(ds.StudyTime)+'/'+str(ds.SeriesNumber)+'_'+seriesName  #str(ds.SeriesDescription).replace(" ","_")
-         fname=str(ds.Modality)+'_'+str(ds.StudyDate)+'T'+str(ds.StudyTime)+'_'+str(ds.SeriesNumber)+'_'+str(ds.SeriesInstanceUID)+'_'+str(ds.InstanceNumber)
+	 foldername=foldername+'/'+pname+'/'+str(ds.StudyDate)+'T'+studytime+'/'+str(ds.SeriesNumber)+'_'+seriesName  #str(ds.SeriesDescription).replace(" ","_")
+         fname=str(ds.Modality)+'_'+str(ds.StudyDate)+'T'+studytime+'_'+str(ds.SeriesNumber)+'_'+str(ds.SeriesInstanceUID)+'_'+str(ds.InstanceNumber)
          
 	 if not os.path.exists(foldername):
                 os.makedirs(foldername)
