@@ -50,7 +50,7 @@ def _mreplace(text, wordDic):
 
 
 # Rigrous testing Required.....	 
-def _anonmyize(filename,foldername,remove_private_tags=True):
+def _anonsort(filename,foldername,remove_private_tags=True):
 	# filename: Source which needs to be anonymized.
 	# newloc: Where should this file should be stored.
 	# newname: New name for this file.
@@ -118,6 +118,44 @@ def _anonmyize(filename,foldername,remove_private_tags=True):
 		print "Duplicate......"
 		dupfiles.append(filename)
 
+def _sort(filename,foldername):
+	 global dic,dupfiles
+
+         rep_dic={
+         ' ':'_',
+         '^':'_',
+         '/':'_',
+         '__':'_',
+         '  ':'_'}
+	 
+	 try:
+                ds = dicom.read_file(filename)
+         except:
+                print "Not a dicom file...."
+                return
+	 try:
+                if not "SeriesDescription" in ds:
+                        ds.SeriesDescription='NA'
+         except:
+                pass
+
+         print "Checking....."+filename
+
+         seriesName=_mreplace(ds.SeriesDescription,rep_dic)
+	 pname=_mreplace(ds.PatientName,rep_dic)
+         
+	 foldername=foldername+'/'+pname+'/'+str(ds.StudyDate)+'T'+str(ds.StudyTime)+'/'+str(ds.SeriesNumber)+'_'+seriesName  #str(ds.SeriesDescription).replace(" ","_")
+         fname=str(ds.Modality)+'_'+str(ds.StudyDate)+'T'+str(ds.StudyTime)+'_'+str(ds.SeriesNumber)+'_'+str(ds.SeriesInstanceUID)+'_'+str(ds.InstanceNumber)
+         
+	 if not os.path.exists(foldername):
+                os.makedirs(foldername)
+
+         if not os.path.isfile(foldername+'/'+fname):
+                ds.save_as(foldername+'/'+fname)
+         else:
+                print "Duplicate......"
+                dupfiles.append(filename)
+
 
 
 if __name__ == '__main__':
@@ -140,10 +178,11 @@ if __name__ == '__main__':
 	parser.add_option("-t", "--table", dest="tablename",help="translation table")
 	parser.add_option("-s", "--source", dest="source",help="source data")
 	parser.add_option("-d", "--target", dest="target",help="target destination")
-
+	parser.add_option("-m","--mode",dest="mode",metavar="NUMBER",type="int",help="1 for sorting 2 anonmizing and sorting")
 	(options,args) = parser.parse_args()
 
-	_create_dic_from_translation_table(options.tablename)
+	if options.mode == 2:
+		_create_dic_from_translation_table(options.tablename)
 
 	   
     #
@@ -152,6 +191,11 @@ if __name__ == '__main__':
 		for root,dir,files in os.walk(options.source):
 			for each in files:
 				print options.target
-				_anonmyize(os.path.join(root,each),options.target)
+				if options.mode == 2:
+					print "Anonmizing and sorting the given data"
+					_anonsort(os.path.join(root,each),options.target)
+				else:
+					print "Sorting the given data"
+                                        _sort(os.path.join(root,each),options.target)
 
         print "Total Number of Duplicate files = "+str(len(dupfiles)) 
