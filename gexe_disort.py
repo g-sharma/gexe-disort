@@ -88,6 +88,12 @@ def _anonsort(filename,foldername,remove_private_tags=True):
 	 	if name in ds:
 	 		ds.data_element(name).value = de_name
 
+	 try:
+	 	ds.InstitutionName=de_name
+		ds.InstitutionAddress=de_name
+	 except:
+		pass
+
 	 if remove_private_tags:
 	 	ds.remove_private_tags()
    
