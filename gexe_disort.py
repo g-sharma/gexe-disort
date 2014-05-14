@@ -79,6 +79,8 @@ def _anonsort(filename,foldername,remove_private_tags=True):
 	 ds.walk(PN_callback)
 
 	 ds.PatientID = de_name
+	 ds.PatientIdentityRemoved='YES'
+	 ds.DeidentificationMethod='@Brain Imaging Lab'
 	 
 	 for name in ['OtherPatientIDs', 'OtherPatientIDsSequence']:
 	 	if name in ds:
